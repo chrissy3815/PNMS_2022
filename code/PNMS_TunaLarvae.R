@@ -10,6 +10,16 @@ library(here)
 library(oce)
 library(ocedata)
 library(rgdal)
+library(ncdf4)
+
+# color function:
+append_alpha  <- function(color, alpha) {
+alpha_scaled  <- round(alpha*255)
+alpha_hex  <- as.hexmode(alpha_scaled)
+color_with_alpha  <- paste0(color, alpha_hex)
+
+return(color_with_alpha)
+}
 
 # read in the data tables:
 photo_data<- read.csv(here("data", "PAL22_Tuna photo data.csv"), nrows=22)
@@ -25,6 +35,10 @@ names(tow_data)<- c("Sample.ID", "Site", "Date", "FlowIn", "TimeIn", "FlowOut",
 ################################################################################
 ## Calculate abundance of tunas
 ################################################################################
+
+# Correct the tuna species that still have 2 possibilities (just give them the one we were more confident of for now)
+photo_data$Species[photo_data$Species=="Katsuwonus/Thunnus"]<- "Katsuwonus"
+photo_data$Species[photo_data$Species=="Thunnus/Katsuwonus"]<- "Thunnus"
 
 # Sum how many tuna larvae per station, by species:
 # (including the ones that couldn't be measured)
@@ -92,25 +106,62 @@ max(length_data$Age)
 ################################################################################
 # load the coastline
 data("coastlineWorldFine")
+# read in the bathymetry
+ncid<- nc_open(here('data','Palau_Bathymetry', 'gebco_2023_n15.0_s0.0_w120.0_e145.0.nc'))
+print(ncid)
+bathylat<- ncvar_get(ncid, varid='lat')
+bathylon<- ncvar_get(ncid, varid='lon')
+bathy<- ncvar_get(ncid, varid='elevation')
+nc_close(ncid)
 
-#setEPS()
-#postscript('1_AcrossYears/StationLocations2015-17_20190621.eps')
-mapPlot(coastlineWorldFine, longitudelim=c(130, 140), latitudelim=c(5, 10),
-        projection="+proj=cea", grid=FALSE, axes=TRUE, cex.axis=1)
-mapContour(bathylon, bathylat, bathy,
-           levels=c(-1000, -3000, -5000),
-           lwd=0.75, col='grey')
-# Add 2015 stations:
-mapPoints(totaltuna2015$LonDEC, totaltuna2015$LatDEC, pch=5, cex=1.1)
-mapPoints(totaltuna2016$LonDEC, totaltuna2016$LatDEC, pch=2, cex=1.1)
-mapPoints(totaltuna2017$LonDEC, totaltuna2017$LatDEC, pch=3, cex=1.1)
-# as text:
-# text(totaltuna2015$LonDEC, totaltuna2015$LatDEC, totaltuna2015$Station, cex=0.75)
-# text(totaltuna2016$LonDEC, totaltuna2016$LatDEC, totaltuna2016$Station, cex=0.75, col='red')
-# text(totaltuna2017$LonDEC, totaltuna2017$LatDEC, totaltuna2017$Station, cex=0.75, col='blue')
+tuna_catch_plots<- function(filename, exes, whys, cexes){
+  pdf(filename)
+  mapPlot(coastlineWorldFine, longitudelim=c(130, 137), latitudelim=c(5, 8),
+          projection="+proj=cea", grid=FALSE, lwd=2,
+          axisStyle=5, lonlabels=seq(130, 136, 2), latlabels = c(4, 6, 8))
+  mapContour(bathylon, bathylat, bathy,
+             levels=c(-1000, -3000, -5000), drawlabels = FALSE,
+             lwd=0.75, col=c('lightgrey', 'grey', 'darkgrey'))
+  colz<- mako(length(exes)+2, alpha=0.75)
+  mapPoints(exes, whys, cex=cexes, pch=19, col=colz[3:length(colz)])
+  legend("bottomright", legend=as.character(unique(cexes)), title="N larvae",
+         pch=19, col='grey', pt.cex=unique(cexes))
 
-# Add PIPA polygon
-mapLines(pipa_boundaries$long,pipa_boundaries$lat, lwd=2)
-# legend("bottomright", legend=c("2015", "2016", "2017"), pch=c(5,2,3), cex=1.1)
-mapScalebar("topleft")
+  # Want to add a PNMS polygon!
 
+  # Add an inset map to show the location on the globe:
+  plotInset('bottomleft',
+            expr={plot(coastlineWorldFine, longitudelim=c(115, 160), latitudelim=c(-10, 20),
+                       inset=TRUE, bg='white', axes=F, lwd=0.75)
+              polygon(x=c(130, 130, 140, 140), y=c(5, 10, 10, 5), col='cyan')
+            })
+
+  dev.off()
+}
+
+# Pooled larvae:
+tuna_catch_plots(here('results', 'PooledTunaLarvaeCatch.pdf'),
+                 exes = tuna_pooled$LONGITUDE,
+                 whys = tuna_pooled$LATITUDE,
+                 cexes = tuna_pooled$Nlarvae)
+
+# Thunnus
+I<- which(tuna_all$Species=="Thunnus")
+tuna_catch_plots(here('results', 'ThunnusLarvaeCatch.pdf'),
+                 exes = tuna_all$LONGITUDE[I],
+                 whys = tuna_all$LATITUDE[I],
+                 cexes = tuna_all$Nlarvae[I])
+
+# Katsuwonus
+I<- which(tuna_all$Species=="Katsuwonus")
+tuna_catch_plots(here('results', 'KatsuwonusLarvaeCatch.pdf'),
+                 exes = tuna_all$LONGITUDE[I],
+                 whys = tuna_all$LATITUDE[I],
+                 cexes = tuna_all$Nlarvae[I])
+
+# Auxis
+I<- which(tuna_all$Species=="Auxis")
+tuna_catch_plots(here('results', 'AuxisLarvaeCatch.pdf'),
+                 exes = tuna_all$LONGITUDE[I],
+                 whys = tuna_all$LATITUDE[I],
+                 cexes = tuna_all$Nlarvae[I])
