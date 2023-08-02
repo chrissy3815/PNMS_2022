@@ -11,6 +11,7 @@ library(oce)
 library(ocedata)
 library(rgdal)
 library(ncdf4)
+library(viridisLite)
 
 # color function:
 append_alpha  <- function(color, alpha) {
@@ -72,6 +73,15 @@ tuna_pooled<- merge(tuna_pooled, tow_data[c("Site", "Tow", "MaxDepth_m", "Volume
 tuna_all$Abund_m2<- tuna_all$Nlarvae/tuna_all$Volume_m3*tuna_all$MaxDepth_m
 tuna_pooled$Abund_m2<- tuna_pooled$Nlarvae/tuna_pooled$Volume_m3*tuna_pooled$MaxDepth_m
 
+# Need to separate "Site" into "Site" and "Station"
+sampleid<- strsplit(as.character(tuna_all$Site), split='_')
+tuna_all$Site<- sapply(sampleid, '[', 1)
+tuna_all$Station<- sapply(sampleid, '[', 2)
+# Repeat for tuna_pooled
+sampleid<- strsplit(as.character(tuna_pooled$Site), split='_')
+tuna_pooled$Site<- sapply(sampleid, '[', 1)
+tuna_pooled$Station<- sapply(sampleid, '[', 2)
+
 ################################################################################
 ## Calculate length and age
 ################################################################################
@@ -115,6 +125,12 @@ bathy<- ncvar_get(ncid, varid='elevation')
 nc_close(ncid)
 
 tuna_catch_plots<- function(filename, exes, whys, cexes){
+  # re-order the points in increasing size:
+  I<- order(cexes)
+  exes<- exes[I]
+  whys<- whys[I]
+  cexes<- cexes[I]
+
   pdf(filename)
   mapPlot(coastlineWorldFine, longitudelim=c(130, 137), latitudelim=c(5, 8),
           projection="+proj=cea", grid=FALSE, lwd=2,
@@ -122,10 +138,10 @@ tuna_catch_plots<- function(filename, exes, whys, cexes){
   mapContour(bathylon, bathylat, bathy,
              levels=c(-1000, -3000, -5000), drawlabels = FALSE,
              lwd=0.75, col=c('lightgrey', 'grey', 'darkgrey'))
-  colz<- mako(length(exes)+2, alpha=0.75)
-  mapPoints(exes, whys, cex=cexes, pch=19, col=colz[3:length(colz)])
+  colz<- viridisLite::mako(length(exes)+1, alpha=0.75)
+  mapPoints(exes, whys, cex=sqrt(cexes), pch=19, col=colz[2:length(colz)])
   legend("bottomright", legend=as.character(unique(cexes)), title="N larvae",
-         pch=19, col='grey', pt.cex=unique(cexes))
+         pch=19, col='grey', pt.cex=sqrt(unique(cexes)))
 
   # Want to add a PNMS polygon!
 
@@ -139,29 +155,47 @@ tuna_catch_plots<- function(filename, exes, whys, cexes){
   dev.off()
 }
 
+# The tows within each site are so close together that we need to plot one
+# symbol per site. First, for tuna_pooled:
+tuna_pooled_plotting<- aggregate(Nlarvae~Site, data=tuna_pooled, FUN=sum)
+Site_latz<- aggregate(LATITUDE~Site, data=tuna_pooled, FUN=mean)
+Site_lonz<- aggregate(LONGITUDE~Site, data=tuna_pooled, FUN=mean)
+tuna_pooled_plotting<- merge(tuna_pooled_plotting, Site_latz)
+tuna_pooled_plotting<- merge(tuna_pooled_plotting, Site_lonz)
+
+# Repeat for tuna_all:
+tuna_all_plotting<- aggregate(Nlarvae~Site+Species, data=tuna_all, FUN=sum)
+tuna_all_plotting<- merge(tuna_all_plotting, Site_latz)
+tuna_all_plotting<- merge(tuna_all_plotting, Site_lonz)
+
 # Pooled larvae:
 tuna_catch_plots(here('results', 'PooledTunaLarvaeCatch.pdf'),
-                 exes = tuna_pooled$LONGITUDE,
-                 whys = tuna_pooled$LATITUDE,
-                 cexes = tuna_pooled$Nlarvae)
+                 exes = tuna_pooled_plotting$LONGITUDE,
+                 whys = tuna_pooled_plotting$LATITUDE,
+                 cexes = tuna_pooled_plotting$Nlarvae)
 
 # Thunnus
 I<- which(tuna_all$Species=="Thunnus")
 tuna_catch_plots(here('results', 'ThunnusLarvaeCatch.pdf'),
-                 exes = tuna_all$LONGITUDE[I],
-                 whys = tuna_all$LATITUDE[I],
-                 cexes = tuna_all$Nlarvae[I])
+                 exes = tuna_all_plotting$LONGITUDE[I],
+                 whys = tuna_all_plotting$LATITUDE[I],
+                 cexes = tuna_all_plotting$Nlarvae[I])
 
 # Katsuwonus
 I<- which(tuna_all$Species=="Katsuwonus")
 tuna_catch_plots(here('results', 'KatsuwonusLarvaeCatch.pdf'),
-                 exes = tuna_all$LONGITUDE[I],
-                 whys = tuna_all$LATITUDE[I],
-                 cexes = tuna_all$Nlarvae[I])
+                 exes = tuna_all_plotting$LONGITUDE[I],
+                 whys = tuna_all_plotting$LATITUDE[I],
+                 cexes = tuna_all_plotting$Nlarvae[I])
 
 # Auxis
 I<- which(tuna_all$Species=="Auxis")
 tuna_catch_plots(here('results', 'AuxisLarvaeCatch.pdf'),
-                 exes = tuna_all$LONGITUDE[I],
-                 whys = tuna_all$LATITUDE[I],
-                 cexes = tuna_all$Nlarvae[I])
+                 exes = tuna_all_plotting$LONGITUDE[I],
+                 whys = tuna_all_plotting$LATITUDE[I],
+                 cexes = tuna_all_plotting$Nlarvae[I])
+
+# Next steps:
+# 1. Get rid of multiple colors
+# 2. Try to make a figure with all 3 taxa (different symbol shapes + colors)
+# 3. Set up backtracking!!
