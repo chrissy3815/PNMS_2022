@@ -1,0 +1,52 @@
+&runconf
+!====================================================================!
+nnests               = 1 
+timeMax              = 2419200
+timestep             = 1200
+outputFreq           = 43200
+releaseFilename      = "MarlinRelease_June2018_160-155.5_25-30.txt" 
+!====================================================================!
+!Turbulence Module
+turb                 = .true.
+horDiff              = 20                !horizontal diffusivity
+vertDiff             = 0.00001              !vertical diffusivity
+turbTimestep         = 2400             !in seconds
+!====================================================================!
+!Periodic Boundary Condition
+periodicbc           = .false.
+!====================================================================!
+!Landmask Boundary Condition 
+avoidcoast           = .true.
+!====================================================================!
+!Backward Tracking Module
+backward             = .false.
+!====================================================================!
+!Output files in ASCII instead of netCDF
+ascii                = .false.
+!====================================================================!
+!Flag for putting particles back in the ocean when they go through the
+!uppermost depth level
+upperlevelsurface       = .true.
+!====================================================================!
+!Flag for looping through the velocity fields
+loopfiles               = .false.
+loopfilesstartyear      = 1980
+loopfilesstartmonth     = 1
+loopfilesstartday       = 5
+loopfilesendyear        = 2006
+loopfilesendmonth       = 12
+loopfilesendday         = 29
+!====================================================================!
+!Options for restarting
+writerestart		= .false.
+restartfromfile         = .false.
+restartwritefreq        = 432000
+!====================================================================!
+!Options for mixed layer physics
+mixedlayerphysics 	= .false.
+mixedlayerwmax		= 0
+!====================================================================!
+!Option to turn the trajectory output off (set .false.)
+trajout	   	    	= .true.
+!====================================================================!
+&end
