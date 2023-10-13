@@ -12,6 +12,8 @@ library(ocedata)
 library(rgdal)
 library(ncdf4)
 library(viridisLite)
+library(sf)
+library(raster)
 
 # color function:
 append_alpha  <- function(color, alpha) {
@@ -123,6 +125,9 @@ bathylat<- ncvar_get(ncid, varid='lat')
 bathylon<- ncvar_get(ncid, varid='lon')
 bathy<- ncvar_get(ncid, varid='elevation')
 nc_close(ncid)
+# read in the PNMS shape file:
+pnms_shp<- st_read(here('data', 'Palau_Shapefiles', 'PNMS.shp'), "PNMS")
+pnms_boundaries<- spTransform(as_Spatial(st_geometry(pnms_shp)), "+proj=cea")
 
 tuna_catch_plots<- function(filename, exes, whys, cexes){
   # re-order the points in increasing size:
@@ -130,20 +135,23 @@ tuna_catch_plots<- function(filename, exes, whys, cexes){
   exes<- exes[I]
   whys<- whys[I]
   cexes<- cexes[I]
+  # initialize colors:
+  colz<- viridisLite::mako(5, alpha=0.75)
 
   pdf(filename)
-  mapPlot(coastlineWorldFine, longitudelim=c(130, 137), latitudelim=c(5, 8),
+  mapPlot(coastlineWorldFine, longitudelim=c(128, 138), latitudelim=c(1, 12),
           projection="+proj=cea", grid=FALSE, lwd=2,
           axisStyle=5, lonlabels=seq(130, 136, 2), latlabels = c(4, 6, 8))
   mapContour(bathylon, bathylat, bathy,
              levels=c(-1000, -3000, -5000), drawlabels = FALSE,
-             lwd=0.75, col=c('lightgrey', 'grey', 'darkgrey'))
-  colz<- viridisLite::mako(length(exes)+1, alpha=0.75)
-  mapPoints(exes, whys, cex=sqrt(cexes), pch=19, col=colz[2:length(colz)])
+             lwd=0.75, col=c('darkgrey', 'grey', 'lightgrey'))
+  # Add PNMS boundaries
+  plot(pnms_boundaries, add=TRUE, col=colz[5], border=colz[5])
+
+  # plot larval catch data
+  mapPoints(exes, whys, cex=sqrt(cexes), pch=19, col=colz[3])
   legend("bottomright", legend=as.character(unique(cexes)), title="N larvae",
          pch=19, col='grey', pt.cex=sqrt(unique(cexes)))
-
-  # Want to add a PNMS polygon!
 
   # Add an inset map to show the location on the globe:
   plotInset('bottomleft',
@@ -196,6 +204,5 @@ tuna_catch_plots(here('results', 'AuxisLarvaeCatch.pdf'),
                  cexes = tuna_all_plotting$Nlarvae[I])
 
 # Next steps:
-# 1. Get rid of multiple colors
-# 2. Try to make a figure with all 3 taxa (different symbol shapes + colors)
-# 3. Set up backtracking!!
+# 1. Try to make a figure with all 3 taxa (different symbol shapes + colors)
+# 2. Set up backtracking!!

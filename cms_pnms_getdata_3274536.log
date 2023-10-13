@@ -1,0 +1,53 @@
+Starting Run
+/vortexfs1/scratch/chernandez/cms_latest_gcc/cms-CMHedit/expt
+pn014
+Thu Oct 12 06:08:51 EDT 2023
+WARNING: openmpi/gcc/4.1.4 cannot be loaded due to missing prereq.
+HINT: the following module must be loaded first: gcc/9.3.1
+curl error details: 
+ fill_value and velocity_conversion_factor on read  -30000.0000       1.00000005E-03
+ Opening file for reading: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ Error in the netCDF file: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ NetCDF: I/O failure
+curl error details: 
+ fill_value and velocity_conversion_factor on read  -30000.0000       1.00000005E-03
+ Opening file for reading: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ Error in the netCDF file: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ NetCDF: I/O failure
+curl error details: 
+ fill_value and velocity_conversion_factor on read  -30000.0000       1.00000005E-03
+ Opening file for reading: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ Error in the netCDF file: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ NetCDF: I/O failure
+curl error details: 
+ fill_value and velocity_conversion_factor on read  -30000.0000       1.00000005E-03
+ Opening file for reading: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ Error in the netCDF file: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ NetCDF: I/O failure
+curl error details: 
+ fill_value and velocity_conversion_factor on read  -30000.0000       1.00000005E-03
+ Opening file for reading: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ Error in the netCDF file: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ NetCDF: I/O failure
+curl error details: 
+ fill_value and velocity_conversion_factor on read  -30000.0000       1.00000005E-03
+ Opening file for reading: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ Error in the netCDF file: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ NetCDF: I/O failure
+curl error details: 
+ fill_value and velocity_conversion_factor on read  -30000.0000       1.00000005E-03
+ Opening file for reading: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ Error in the netCDF file: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ NetCDF: I/O failure
+curl error details: 
+ fill_value and velocity_conversion_factor on read  -30000.0000       1.00000005E-03
+ Opening file for reading: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ Error in the netCDF file: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ NetCDF: I/O failure
+curl error details: 
+ fill_value and velocity_conversion_factor on read  -30000.0000       1.00000005E-03
+ Opening file for reading: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ Error in the netCDF file: http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z
+ NetCDF: I/O failure
+Finished getting data
+Thu Oct 12 06:09:12 EDT 2023
