@@ -1,9 +1,9 @@
 &nest_input
 	filename = "http://tds.hycom.org/thredds/dodsC/GLBy0.08/expt_93.0/uv3z"
- 	xaxis = "lon"
- 	yaxis = "lat"
- 	zaxis = "depth"
- 	taxis = "time"
+ 	xaxis = "Longitude"
+ 	yaxis = "Latitude"
+ 	zaxis = "Depth"
+ 	taxis = "Time"
  	xstart = 125
 	xend = 145
 	ystart = -5
@@ -22,21 +22,21 @@
  	jdate_yy = 2000
  	jdate_mm = 1 
  	jdate_dd = 1
- 	lon_name = "lon"
- 	lat_name = "lat" 
- 	depth_name = "depth"
+ 	lon_name = "Longitude"
+ 	lat_name = "Latitude" 
+ 	depth_name = "Depth"
  	depth_conversion_factor = 1
  	time_name = "time"
- 	uvel_name = "water_u"
- 	vvel_name = "water_v"
+ 	uvel_name = "zu"
+ 	vvel_name = "zv"
  	wvel_name = ""
  	wvel_positive_direction = ""
- 	velocity_conversion_factor = 0.001
+ 	velocity_conversion_factor = 1
  	dens_name = ""
  	temp_name = ""
  	saln_name = ""
  	ssh_name = ""
  	angle_file = ""
- 	fill_value = -30000
+ 	fill_value = 1.2676506E30
  	agrid = .true.
 $end

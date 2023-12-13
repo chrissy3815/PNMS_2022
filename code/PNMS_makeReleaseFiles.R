@@ -68,5 +68,5 @@ release2022<- data.frame(polygon=1:nrows, Longitude=latlondate$LONGITUDE,
                          #seconds=latlondate$TimeMidTow*(24*60*60)-(9*60*60))
 
 # write the release file to a tab-delimited file:
-write.table(release2022, file=here('backtracking', 'test_run_PNMS.txt'), sep='\t', row.names=F, col.names=F)
+write.table(release2022, file=here('backtracking','input_pnms2022', 'ReleaseFile_PNMS_Oct2022.txt'), sep='\t', row.names=F, col.names=F)
 

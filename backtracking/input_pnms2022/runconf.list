@@ -1,10 +1,10 @@
 &runconf
 !====================================================================!
 nnests               = 1 
-timeMax              = 2419200
+timeMax              = 1296000
 timestep             = 1200
 outputFreq           = 43200
-releaseFilename      = "MarlinRelease_June2018_160-155.5_25-30.txt" 
+releaseFilename      = "ReleaseFile_PNMS_Oct2022.txt" 
 !====================================================================!
 !Turbulence Module
 turb                 = .true.
@@ -19,7 +19,7 @@ periodicbc           = .false.
 avoidcoast           = .true.
 !====================================================================!
 !Backward Tracking Module
-backward             = .false.
+backward             = .true.
 !====================================================================!
 !Output files in ASCII instead of netCDF
 ascii                = .false.

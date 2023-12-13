@@ -1,0 +1,181 @@
+Starting Run
+/vortexfs1/scratch/chernandez/cms_latest_gcc/cms-CMHedit/expt
+pn112
+Thu Nov  9 09:44:24 EST 2023
+ ibiotimestep        1200
+ ibiotimestep        1200
+ ibiotimestep        1200
+ ibiotimestep        1200
+ ibiotimestep        1200
+ ibiotimestep        1200
+ ibiotimestep        1200
+ ibiotimestep        1200
+ ==========================================
+ File name  : traj_file_4.nc
+ Total number of release events     : 1 (numbers 4 to 4)
+ Total number of particles released : 1000
+ Total number of time steps         : 2989
+ Total number of time steps in output file: 21
+ ==========================================
+ ==========================================
+ File name  : traj_file_6.nc
+ Total number of release events     : 1 (numbers 6 to 6)
+ Total number of particles released : 1000
+ Total number of time steps         : 2773
+ Total number of time steps in output file: 21
+ ==========================================
+ ==========================================
+ File name  : traj_file_2.nc
+ Total number of release events     : 1 (numbers 2 to 2)
+ Total number of particles released : 1000
+ Total number of time steps         : 2845
+ Total number of time steps in output file: 21
+ ==========================================
+ ==========================================
+ File name  : traj_file_8.nc
+ Total number of release events     : 1 (numbers 8 to 8)
+ Total number of particles released : 1000
+ Total number of time steps         : 2773
+ Total number of time steps in output file: 21
+ ==========================================
+ ==========================================
+ File name  : traj_file_7.nc
+ Total number of release events     : 1 (numbers 7 to 7)
+ Total number of particles released : 1000
+ Total number of time steps         : 2773
+ Total number of time steps in output file: 21
+ ==========================================
+ ==========================================
+ File name  : traj_file_1.nc
+ Total number of release events     : 1 (numbers 1 to 1)
+ Total number of particles released : 1000
+ Total number of time steps         : 2053
+ Total number of time steps in output file: 21
+ ==========================================
+ ==========================================
+ File name  : traj_file_5.nc
+ Total number of release events     : 1 (numbers 5 to 5)
+ Total number of particles released : 1000
+ Total number of time steps         : 2989
+ Total number of time steps in output file: 21
+ ==========================================
+ ==========================================
+ File name  : traj_file_3.nc
+ Total number of release events     : 1 (numbers 3 to 3)
+ Total number of particles released : 1000
+ Total number of time steps         : 2989
+ Total number of time steps in output file: 21
+ ==========================================
+[pn112:22882:0] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x18)
+[pn112:22884:0] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x18)
+[pn112:22887:0] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x18)
+[pn112:22889:0] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x18)
+[pn112:22883:0] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x18)
+[pn112:22885:0] Caught signal 11 (Segmentation fault: address not mapped to object at address 0x18)
+[pn112:22888:0] Caught signal 11 (Segmentation fault: invalid permissions for mapped object at address 0x2aaab0527c50)
+==== backtrace ====
+ 0 0x0000000000041e02 ucs_debug_cleanup()  ???:0
+ 1 0x000000000000f630 _L_unlock_13()  funlockfile.c:0
+ 2 0x000000000000d9d0 ucp_ep_close_nb()  ???:0
+ 3 0x000000000000dbae ucp_ep_destroy()  ???:0
+ 4 0x0000000000008fd8 component_finalize()  osc_ucx_component.c:0
+ 5 0x00000000001e7854 ompi_osc_base_finalize()  ???:0
+ 6 0x0000000000080df9 ompi_mpi_finalize()  ???:0
+ 7 0x000000000004ade9 PMPI_FINALIZE()  ???:0
+ 8 0x000000000045cfc8 MAIN__()  cms.f90:0
+ 9 0x000000000045d008 main()  ???:0
+10 0x0000000000022555 __libc_start_main()  ???:0
+11 0x0000000000402989 _start()  ???:0
+===================
+[pn112:22883:0] Process frozen...
+==== backtrace ====
+ 0 0x0000000000041e02 ucs_debug_cleanup()  ???:0
+ 1 0x000000000000f630 _L_unlock_13()  funlockfile.c:0
+ 2 0x000000000000d9d0 ucp_ep_close_nb()  ???:0
+ 3 0x000000000000dbae ucp_ep_destroy()  ???:0
+ 4 0x0000000000008fd8 component_finalize()  osc_ucx_component.c:0
+ 5 0x00000000001e7854 ompi_osc_base_finalize()  ???:0
+ 6 0x0000000000080df9 ompi_mpi_finalize()  ???:0
+ 7 0x000000000004ade9 PMPI_FINALIZE()  ???:0
+ 8 0x000000000045cfc8 MAIN__()  cms.f90:0
+ 9 0x000000000045d008 main()  ???:0
+10 0x0000000000022555 __libc_start_main()  ???:0
+11 0x0000000000402989 _start()  ???:0
+===================
+[pn112:22885:0] Process frozen...
+==== backtrace ====
+ 0 0x0000000000041e02 ucs_debug_cleanup()  ???:0
+ 1 0x000000000000f630 _L_unlock_13()  funlockfile.c:0
+ 2 0x000000000000d9d0 ucp_ep_close_nb()  ???:0
+ 3 0x000000000000dbae ucp_ep_destroy()  ???:0
+ 4 0x0000000000008fd8 component_finalize()  osc_ucx_component.c:0
+ 5 0x00000000001e7854 ompi_osc_base_finalize()  ???:0
+ 6 0x0000000000080df9 ompi_mpi_finalize()  ???:0
+ 7 0x000000000004ade9 PMPI_FINALIZE()  ???:0
+ 8 0x000000000045cfc8 MAIN__()  cms.f90:0
+ 9 0x000000000045d008 main()  ???:0
+10 0x0000000000022555 __libc_start_main()  ???:0
+11 0x0000000000402989 _start()  ???:0
+===================
+==== backtrace ====
+ 0 0x0000000000041e02 ucs_debug_cleanup()  ???:0
+ 1 0x000000000000f630 _L_unlock_13()  funlockfile.c:0
+ 2 0x000000000000d9d0 ucp_ep_close_nb()  ???:0
+ 3 0x000000000000dbae ucp_ep_destroy()  ???:0
+ 4 0x0000000000008fd8 component_finalize()  osc_ucx_component.c:0
+ 5 0x00000000001e7854 ompi_osc_base_finalize()  ???:0
+ 6 0x0000000000080df9 ompi_mpi_finalize()  ???:0
+ 7 0x000000000004ade9 PMPI_FINALIZE()  ???:0
+ 8 0x000000000045cfc8 MAIN__()  cms.f90:0
+ 9 0x000000000045d008 main()  ???:0
+10 0x0000000000022555 __libc_start_main()  ???:0
+11 0x0000000000402989 _start()  ???:0
+===================
+==== backtrace ====
+ 0 0x0000000000041e02 ucs_debug_cleanup()  ???:0
+ 1 0x000000000000f630 _L_unlock_13()  funlockfile.c:0
+ 2 0x000000000000d9d0 ucp_ep_close_nb()  ???:0
+ 3 0x000000000000dbae ucp_ep_destroy()  ???:0
+ 4 0x0000000000008fd8 component_finalize()  osc_ucx_component.c:0
+ 5 0x00000000001e7854 ompi_osc_base_finalize()  ???:0
+ 6 0x0000000000080df9 ompi_mpi_finalize()  ???:0
+ 7 0x000000000004ade9 PMPI_FINALIZE()  ???:0
+ 8 0x000000000045cfc8 MAIN__()  cms.f90:0
+ 9 0x000000000045d008 main()  ???:0
+10 0x0000000000022555 __libc_start_main()  ???:0
+11 0x0000000000402989 _start()  ???:0
+===================
+[pn112:22887:0] Process frozen...
+[pn112:22884:0] Process frozen...
+[pn112:22889:0] Process frozen...
+==== backtrace ====
+ 0 0x0000000000041e02 ucs_debug_cleanup()  ???:0
+ 1 0x000000000000f630 _L_unlock_13()  funlockfile.c:0
+ 2 0x000000000000d9e6 ucp_ep_close_nb()  ???:0
+ 3 0x000000000000dbae ucp_ep_destroy()  ???:0
+ 4 0x0000000000008fd8 component_finalize()  osc_ucx_component.c:0
+ 5 0x00000000001e7854 ompi_osc_base_finalize()  ???:0
+ 6 0x0000000000080df9 ompi_mpi_finalize()  ???:0
+ 7 0x000000000004ade9 PMPI_FINALIZE()  ???:0
+ 8 0x000000000045cfc8 MAIN__()  cms.f90:0
+ 9 0x000000000045d008 main()  ???:0
+10 0x0000000000022555 __libc_start_main()  ???:0
+11 0x0000000000402989 _start()  ???:0
+===================
+[pn112:22888:0] Process frozen...
+==== backtrace ====
+ 0 0x0000000000041e02 ucs_debug_cleanup()  ???:0
+ 1 0x000000000000f630 _L_unlock_13()  funlockfile.c:0
+ 2 0x000000000000d9d0 ucp_ep_close_nb()  ???:0
+ 3 0x000000000000dbae ucp_ep_destroy()  ???:0
+ 4 0x0000000000008fd8 component_finalize()  osc_ucx_component.c:0
+ 5 0x00000000001e7854 ompi_osc_base_finalize()  ???:0
+ 6 0x0000000000080df9 ompi_mpi_finalize()  ???:0
+ 7 0x000000000004ade9 PMPI_FINALIZE()  ???:0
+ 8 0x000000000045cfc8 MAIN__()  cms.f90:0
+ 9 0x000000000045d008 main()  ???:0
+10 0x0000000000022555 __libc_start_main()  ???:0
+11 0x0000000000402989 _start()  ???:0
+===================
+[pn112:22882:0] Process frozen...
+slurmstepd: error: *** JOB 45445 ON pn112 CANCELLED AT 2023-11-09T10:44:36 DUE TO TIME LIMIT ***
