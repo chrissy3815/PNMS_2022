@@ -113,6 +113,16 @@ length_data$Age[I]<- (length_data$Length.mm[I]-1.524)/0.38 + 2
 
 max(length_data$Age)
 
+# dataframe with taxon, age, and catch location information:
+# Separate "Site" into "Site" and "Station"
+sampleid<- strsplit(as.character(length_data$Site), split='_')
+length_data$Site<- sapply(sampleid, '[', 1)
+length_data$Station<- sapply(sampleid, '[', 2)
+# merge with tuna_all to add lat/lon and date information:
+length_data<- merge(length_data, tuna_all[,c("Site", "Station", "LATITUDE", "LONGITUDE", "Date")])
+# save as .Rdata:
+save(file=here("results","PNMS_LengthAge.Rdata"), length_data)
+
 ################################################################################
 ## Plot locations of catches with catch numbers
 ################################################################################
@@ -205,4 +215,3 @@ tuna_catch_plots(here('results', 'AuxisLarvaeCatch.pdf'),
 
 # Next steps:
 # 1. Try to make a figure with all 3 taxa (different symbol shapes + colors)
-# 2. Set up backtracking!!

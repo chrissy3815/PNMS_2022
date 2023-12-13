@@ -55,7 +55,7 @@ DayOfMonth<- as.numeric(sapply(temp, '[', 2))
 tuna_all$Day<- DayOfMonth
 
 # take only the columns of interest:
-latlondate<- tuna_all[,c("LATITUDE", "LONGITUDE", "Day", "TimeMidTow", "MaxDepth_m")]
+latlondate<- tuna_all[,c("Site", "LATITUDE", "LONGITUDE", "Day", "TimeMidTow", "MaxDepth_m")]
 # get rid of the duplicate rows:
 latlondate<- latlondate[!duplicated(latlondate),]
 
@@ -68,5 +68,11 @@ release2022<- data.frame(polygon=1:nrows, Longitude=latlondate$LONGITUDE,
                          #seconds=latlondate$TimeMidTow*(24*60*60)-(9*60*60))
 
 # write the release file to a tab-delimited file:
-write.table(release2022, file=here('backtracking','input_pnms2022', 'ReleaseFile_PNMS_Oct2022.txt'), sep='\t', row.names=F, col.names=F)
+#write.table(release2022, file=here('backtracking','input_pnms2022', 'ReleaseFile_PNMS_Oct2022.txt'), sep='\t', row.names=F, col.names=F)
 
+# Make a key that can match up site and station with release lines:
+releasekey<- data.frame(polygon=1:nrows, Site=latlondate$Site,
+                        Longitude=latlondate$LONGITUDE,
+                        Latitude=latlondate$LATITUDE)
+# save as .Rdata:
+save(file=here("backtracking","postproc","releaseSiteKey.Rdata"), releasekey)
