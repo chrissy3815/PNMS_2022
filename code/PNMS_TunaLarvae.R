@@ -66,9 +66,9 @@ tuna_all<- merge(tuna_all, locations, by=c("Site","Tow"), all.x=TRUE)
 tuna_pooled<- merge(tuna_pooled, locations, by=c("Site", "Tow"), all.x=TRUE)
 
 # Add tow depth/volume to tuna data:
-tuna_all<- merge(tuna_all, tow_data[c("Site", "Tow", "MaxDepth_m", "Volume_m3")],
+tuna_all<- merge(tuna_all, tow_data[c("Site", "Tow", "MaxDepth_m", "Volume_m3", "Temperature_depth")],
                  by=c("Site","Tow"), all.x=TRUE)
-tuna_pooled<- merge(tuna_pooled, tow_data[c("Site", "Tow", "MaxDepth_m", "Volume_m3")],
+tuna_pooled<- merge(tuna_pooled, tow_data[c("Site", "Tow", "MaxDepth_m", "Volume_m3", "Temperature_depth")],
                     by=c("Site", "Tow"), all.x=TRUE)
 
 # Calculate abundances:
@@ -119,7 +119,7 @@ sampleid<- strsplit(as.character(length_data$Site), split='_')
 length_data$Site<- sapply(sampleid, '[', 1)
 length_data$Station<- sapply(sampleid, '[', 2)
 # merge with tuna_all to add lat/lon and date information:
-length_data<- merge(length_data, tuna_all[,c("Site", "Station", "LATITUDE", "LONGITUDE", "Date")])
+length_data<- merge(length_data, tuna_all[,c("Site", "Station", "LATITUDE", "LONGITUDE", "Date", "Temperature_depth")])
 # save as .Rdata:
 save(file=here("results","PNMS_LengthAge.Rdata"), length_data)
 

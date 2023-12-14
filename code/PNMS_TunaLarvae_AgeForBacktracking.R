@@ -24,28 +24,28 @@ I<- which(length_data$Species=="Auxis")
 length_data$Age[I]<- round((length_data$Length.mm[I]-1.524)/0.38) + 2
 
 ## Write a file for each taxon -------------------------------------------------
-# that contains ONLY the release line and the estimated age
+# that contains ONLY the release line, the estimated age, and the station temperature
 
 # Thunnus:
-ageThunnus<- length_data[length_data$Species=="Thunnus",c("Site", "Station", "Age")]
+ageThunnus<- length_data[length_data$Species=="Thunnus",c("Site", "Station", "Age", "Temperature_depth")]
 ageThunnus<- merge(ageThunnus, releasekey)
-ageThunnus<- ageThunnus[, c("polygon", "Age")]
+ageThunnus<- ageThunnus[, c("polygon", "Age", "Temperature_depth")]
 write.table(ageThunnus,
             file=here("backtracking", "postproc", "PNMS2022_ThunnusEstAges.csv"),
             sep=',', row.names = FALSE, col.names = FALSE)
 
 # Katsuwonus:
-ageKatsuwonus<- length_data[length_data$Species=="Katsuwonus",c("Site", "Station", "Age")]
+ageKatsuwonus<- length_data[length_data$Species=="Katsuwonus",c("Site", "Station", "Age", "Temperature_depth")]
 ageKatsuwonus<- merge(ageKatsuwonus, releasekey)
-ageKatsuwonus<- ageKatsuwonus[, c("polygon", "Age")]
+ageKatsuwonus<- ageKatsuwonus[, c("polygon", "Age", "Temperature_depth")]
 write.table(ageKatsuwonus,
             file=here("backtracking", "postproc", "PNMS2022_KatsuwonusEstAges.csv"),
             sep=',', row.names = FALSE, col.names = FALSE)
 
 # Auxis:
-ageAuxis<- length_data[length_data$Species=="Auxis",c("Site", "Station", "Age")]
+ageAuxis<- length_data[length_data$Species=="Auxis",c("Site", "Station", "Age", "Temperature_depth")]
 ageAuxis<- merge(ageAuxis, releasekey)
-ageAuxis<- ageAuxis[, c("polygon", "Age")]
+ageAuxis<- ageAuxis[, c("polygon", "Age", "Temperature_depth")]
 write.table(ageAuxis,
             file=here("backtracking", "postproc", "PNMS2022_AuxisEstAges.csv"),
             sep=',', row.names = FALSE, col.names = FALSE)
