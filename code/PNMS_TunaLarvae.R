@@ -126,6 +126,26 @@ save(file=here("results","PNMS_LengthAge.Rdata"), length_data)
 ################################################################################
 ## Plot locations of catches with catch numbers
 ################################################################################
+#The tows within each site are so close together that we need to plot one symbol
+#per site. We also need to get the zero sites. Larvae were caught only in deep
+#tows, so we'll just use those tows to calculate mean station location at each
+#site.
+
+# separate Site column into Site and Station for locations:
+sampleid<- strsplit(as.character(locations$Site), split='_')
+locations$Site<- sapply(sampleid, '[', 1)
+locations$Station<- sapply(sampleid, '[', 2)
+# aggregate by site:
+site_locations<- aggregate(cbind(LATITUDE,LONGITUDE)~Site, data=locations, FUN=mean)
+
+# First, for tuna_pooled:
+tuna_pooled_plotting<- aggregate(Nlarvae~Site, data=tuna_pooled, FUN=sum)
+tuna_pooled_plotting<- merge(tuna_pooled_plotting, site_locations, all.y=TRUE)
+
+# Repeat for tuna_all:
+tuna_all_plotting<- aggregate(Nlarvae~Site+Species, data=tuna_all, FUN=sum)
+tuna_all_plotting<- merge(tuna_all_plotting, site_locations, all.y=TRUE)
+
 # load the coastline
 data("coastlineWorldFine")
 # read in the bathymetry
@@ -140,6 +160,14 @@ pnms_shp<- st_read(here('data', 'Palau_Shapefiles', 'PNMS.shp'), "PNMS")
 pnms_boundaries<- spTransform(as_Spatial(st_geometry(pnms_shp)), "+proj=cea")
 
 tuna_catch_plots<- function(filename, exes, whys, cexes){
+  # separate out the 0 catch locations:
+  I<- which(is.na(cexes))
+  zerocatch_exes<- exes[I]
+  zerocatch_whys<- whys[I]
+  exes<- exes[-I]
+  whys<- whys[-I]
+  cexes<- cexes[-I]
+
   # re-order the points in increasing size:
   I<- order(cexes)
   exes<- exes[I]
@@ -160,6 +188,8 @@ tuna_catch_plots<- function(filename, exes, whys, cexes){
 
   # plot larval catch data
   mapPoints(exes, whys, cex=sqrt(cexes), pch=19, col=colz[3])
+  # plot zero catch locations:
+  mapPoints(zerocatch_exes, zerocatch_whys, cex=1, pch=1, col='red')
   legend("bottomright", legend=as.character(unique(cexes)), title="N larvae",
          pch=19, col='grey', pt.cex=sqrt(unique(cexes)))
 
@@ -173,19 +203,6 @@ tuna_catch_plots<- function(filename, exes, whys, cexes){
   dev.off()
 }
 
-# The tows within each site are so close together that we need to plot one
-# symbol per site. First, for tuna_pooled:
-tuna_pooled_plotting<- aggregate(Nlarvae~Site, data=tuna_pooled, FUN=sum)
-Site_latz<- aggregate(LATITUDE~Site, data=tuna_pooled, FUN=mean)
-Site_lonz<- aggregate(LONGITUDE~Site, data=tuna_pooled, FUN=mean)
-tuna_pooled_plotting<- merge(tuna_pooled_plotting, Site_latz)
-tuna_pooled_plotting<- merge(tuna_pooled_plotting, Site_lonz)
-
-# Repeat for tuna_all:
-tuna_all_plotting<- aggregate(Nlarvae~Site+Species, data=tuna_all, FUN=sum)
-tuna_all_plotting<- merge(tuna_all_plotting, Site_latz)
-tuna_all_plotting<- merge(tuna_all_plotting, Site_lonz)
-
 # Pooled larvae:
 tuna_catch_plots(here('results', 'PooledTunaLarvaeCatch.pdf'),
                  exes = tuna_pooled_plotting$LONGITUDE,
@@ -193,25 +210,25 @@ tuna_catch_plots(here('results', 'PooledTunaLarvaeCatch.pdf'),
                  cexes = tuna_pooled_plotting$Nlarvae)
 
 # Thunnus
-I<- which(tuna_all$Species=="Thunnus")
+I<- which(tuna_all_plotting$Species=="Thunnus")
+J<- which(site_locations$Site %in% tuna_all_plotting$Site[I])
 tuna_catch_plots(here('results', 'ThunnusLarvaeCatch.pdf'),
-                 exes = tuna_all_plotting$LONGITUDE[I],
-                 whys = tuna_all_plotting$LATITUDE[I],
-                 cexes = tuna_all_plotting$Nlarvae[I])
+                 exes = c(tuna_all_plotting$LONGITUDE[I], site_locations$LONGITUDE[-J]),
+                 whys = c(tuna_all_plotting$LATITUDE[I], site_locations$LATITUDE[-J]),
+                 cexes = c(tuna_all_plotting$Nlarvae[I], rep(NA, length(site_locations$Site[-J]))) )
 
 # Katsuwonus
-I<- which(tuna_all$Species=="Katsuwonus")
+I<- which(tuna_all_plotting$Species=="Katsuwonus")
+J<- which(site_locations$Site %in% tuna_all_plotting$Site[I])
 tuna_catch_plots(here('results', 'KatsuwonusLarvaeCatch.pdf'),
-                 exes = tuna_all_plotting$LONGITUDE[I],
-                 whys = tuna_all_plotting$LATITUDE[I],
-                 cexes = tuna_all_plotting$Nlarvae[I])
+                 exes = c(tuna_all_plotting$LONGITUDE[I], site_locations$LONGITUDE[-J]),
+                 whys = c(tuna_all_plotting$LATITUDE[I], site_locations$LATITUDE[-J]),
+                 cexes = c(tuna_all_plotting$Nlarvae[I], rep(NA, length(site_locations$Site[-J]))) )
 
 # Auxis
-I<- which(tuna_all$Species=="Auxis")
+I<- which(tuna_all_plotting$Species=="Auxis")
+J<- which(site_locations$Site %in% tuna_all_plotting$Site[I])
 tuna_catch_plots(here('results', 'AuxisLarvaeCatch.pdf'),
-                 exes = tuna_all_plotting$LONGITUDE[I],
-                 whys = tuna_all_plotting$LATITUDE[I],
-                 cexes = tuna_all_plotting$Nlarvae[I])
-
-# Next steps:
-# 1. Try to make a figure with all 3 taxa (different symbol shapes + colors)
+                 exes = c(tuna_all_plotting$LONGITUDE[I], site_locations$LONGITUDE[-J]),
+                 whys = c(tuna_all_plotting$LATITUDE[I], site_locations$LATITUDE[-J]),
+                 cexes = c(tuna_all_plotting$Nlarvae[I], rep(NA, length(site_locations$Site[-J]))) )
