@@ -179,7 +179,7 @@ tuna_catch_plots<- function(filename, exes, whys, cexes){
   pdf(filename)
   mapPlot(coastlineWorldFine, longitudelim=c(128, 138), latitudelim=c(1, 12),
           projection="+proj=cea", grid=FALSE, lwd=2,
-          axisStyle=5, lonlabels=seq(130, 136, 2), latlabels = c(4, 6, 8))
+          axisStyle=5, lonlabels=seq(128, 140, 2), latlabels = seq(2, 10, 2))
   mapContour(bathylon, bathylat, bathy,
              levels=c(-1000, -3000, -5000), drawlabels = FALSE,
              lwd=0.75, col=c('darkgrey', 'grey', 'lightgrey'))
@@ -197,7 +197,7 @@ tuna_catch_plots<- function(filename, exes, whys, cexes){
   plotInset('bottomleft',
             expr={plot(coastlineWorldFine, longitudelim=c(115, 160), latitudelim=c(-10, 20),
                        inset=TRUE, bg='white', axes=F, lwd=0.75)
-              polygon(x=c(130, 130, 140, 140), y=c(5, 10, 10, 5), col='cyan')
+              polygon(x=c(127, 127, 140, 140), y=c(1, 12, 12, 1), col='cyan')
             })
 
   dev.off()
