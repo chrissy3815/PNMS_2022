@@ -2,6 +2,7 @@
 ### Code for analyzing tuna larvae from PNMS samples
 ### Samples collected Oct 2022
 ### Analysis code written July 2023
+### Updated February 2024 with RadSeq DNA IDs
 ################################################################################
 
 # load packages
@@ -25,7 +26,7 @@ return(color_with_alpha)
 }
 
 # read in the data tables:
-photo_data<- read.csv(here("data", "PAL22_Tuna photo data.csv"), nrows=22)
+photo_data<- read.csv(here("data", "PAL22_Tuna photo data.csv"), nrows=22)[,1:6]
 photo_calibration<- read.xlsx(here("data", "PNMS_Calibration.xlsx"))
 length_data<- read.table(here("data","LengthResults_July2023.txt"), header=TRUE)
 locations<- read.xlsx(here("data", "PAL_2022_Plankton_Locations.xlsx"))
@@ -34,16 +35,27 @@ tow_data<- read.xlsx(here("data", "PAL_2022_Fish larvae_Additional tow data_July
 names(tow_data)<- c("Sample.ID", "Site", "Date", "FlowIn", "TimeIn", "FlowOut",
                     "TimeOut", "Duration", "MaxDepth_mba", "MaxDepth_m",
                     "FlowRotations", "Distance_m", "Volume_m3", "Temperature_depth")
+RADseq_IDs<- read.xlsx(here("data", "Palau_tuna_2bRAD_ID.xlsx"))
+
+################################################################################
+## Compare morphological and genetic IDs
+################################################################################
+# Fix a couple of column names in radseq dataframe:
+names(RADseq_IDs)[1]<- "Sample.ID"
+names(RADseq_IDs)[3]<- "DNA_ID"
+# merge DNA ID's into the photo_data object
+photo_data<- merge(photo_data, RADseq_IDs, by="Sample.ID")
+# View it, summarize manually (see text)
+View(photo_data)
+
+# Take the genetic IDs as correct:
+photo_data$Species<- photo_data$DNA_ID
 
 ################################################################################
 ## Calculate abundance of tunas
 ################################################################################
 
-# Correct the tuna species that still have 2 possibilities (just give them the one we were more confident of for now)
-photo_data$Species[photo_data$Species=="Katsuwonus/Thunnus"]<- "Katsuwonus"
-photo_data$Species[photo_data$Species=="Thunnus/Katsuwonus"]<- "Thunnus"
-
-# Sum how many tuna larvae per station, by species:
+# Sum how many tuna larvae per station, by Species:
 # (including the ones that couldn't be measured)
 tuna_all<-aggregate(Sample.ID~Species+Site, photo_data[,c("Sample.ID", "Species", "Site")], FUN=length)
 names(tuna_all)[3]<- "Nlarvae"
@@ -102,13 +114,13 @@ length_data$Length.mm<- length_data$Length/length_data$`pixels/(0.1.mm)`*0.1
 # Calculate estimated ages
 length_data$Age<- NA
 # Thunnus, use PIPA curve:
-I<- which(length_data$Species=="Thunnus")
+I<- which(length_data$Species=="Thunnus albacares" | length_data$Species=="Thunnus obesus")
 length_data$Age[I]<- (length_data$Length.mm[I]-3.11)/0.37 + 2
 # Skipjack, use PIPA curve:
-I<- which(length_data$Species=="Katsuwonus")
+I<- which(length_data$Species=="Katsuwonus pelamis")
 length_data$Age[I]<- (length_data$Length.mm[I]-3.38)/0.45 + 2
 # Auxis, use curve from Laiz-Carrion 2013 (doi: 10.3354/meps10108)
-I<- which(length_data$Species=="Auxis")
+I<- which(length_data$Species=="Auxis thazard")
 length_data$Age[I]<- (length_data$Length.mm[I]-1.524)/0.38 + 2
 
 max(length_data$Age)
@@ -209,16 +221,24 @@ tuna_catch_plots(here('results', 'PooledTunaLarvaeCatch.pdf'),
                  whys = tuna_pooled_plotting$LATITUDE,
                  cexes = tuna_pooled_plotting$Nlarvae)
 
-# Thunnus
-I<- which(tuna_all_plotting$Species=="Thunnus")
+# Thunnus albacares
+I<- which(tuna_all_plotting$Species=="Thunnus albacares")
 J<- which(site_locations$Site %in% tuna_all_plotting$Site[I])
-tuna_catch_plots(here('results', 'ThunnusLarvaeCatch.pdf'),
+tuna_catch_plots(here('results', 'YellowfinTunaLarvaeCatch.pdf'),
                  exes = c(tuna_all_plotting$LONGITUDE[I], site_locations$LONGITUDE[-J]),
                  whys = c(tuna_all_plotting$LATITUDE[I], site_locations$LATITUDE[-J]),
                  cexes = c(tuna_all_plotting$Nlarvae[I], rep(NA, length(site_locations$Site[-J]))) )
 
-# Katsuwonus
-I<- which(tuna_all_plotting$Species=="Katsuwonus")
+# Thunnus obesus
+I<- which(tuna_all_plotting$Species=="Thunnus obesus")
+J<- which(site_locations$Site %in% tuna_all_plotting$Site[I])
+tuna_catch_plots(here('results', 'BigeyeTunaLarvaeCatch.pdf'),
+                 exes = c(tuna_all_plotting$LONGITUDE[I], site_locations$LONGITUDE[-J]),
+                 whys = c(tuna_all_plotting$LATITUDE[I], site_locations$LATITUDE[-J]),
+                 cexes = c(tuna_all_plotting$Nlarvae[I], rep(NA, length(site_locations$Site[-J]))) )
+
+# Katsuwonus pelamis
+I<- which(tuna_all_plotting$Species=="Katsuwonus pelamis")
 J<- which(site_locations$Site %in% tuna_all_plotting$Site[I])
 tuna_catch_plots(here('results', 'KatsuwonusLarvaeCatch.pdf'),
                  exes = c(tuna_all_plotting$LONGITUDE[I], site_locations$LONGITUDE[-J]),
@@ -226,7 +246,7 @@ tuna_catch_plots(here('results', 'KatsuwonusLarvaeCatch.pdf'),
                  cexes = c(tuna_all_plotting$Nlarvae[I], rep(NA, length(site_locations$Site[-J]))) )
 
 # Auxis
-I<- which(tuna_all_plotting$Species=="Auxis")
+I<- which(tuna_all_plotting$Species=="Auxis thazard")
 J<- which(site_locations$Site %in% tuna_all_plotting$Site[I])
 tuna_catch_plots(here('results', 'AuxisLarvaeCatch.pdf'),
                  exes = c(tuna_all_plotting$LONGITUDE[I], site_locations$LONGITUDE[-J]),
