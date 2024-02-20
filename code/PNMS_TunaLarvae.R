@@ -131,7 +131,8 @@ sampleid<- strsplit(as.character(length_data$Site), split='_')
 length_data$Site<- sapply(sampleid, '[', 1)
 length_data$Station<- sapply(sampleid, '[', 2)
 # merge with tuna_all to add lat/lon and date information:
-length_data<- merge(length_data, tuna_all[,c("Site", "Station", "LATITUDE", "LONGITUDE", "Date", "Temperature_depth")])
+length_data<- unique(merge(length_data, tuna_all[,c("Site", "Station", "LATITUDE", "LONGITUDE", "Date", "Temperature_depth")],
+                     by=c("Site", "Station")))
 # save as .Rdata:
 save(file=here("results","PNMS_LengthAge.Rdata"), length_data)
 

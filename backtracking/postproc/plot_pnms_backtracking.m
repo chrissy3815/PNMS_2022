@@ -33,8 +33,11 @@ relfile = dlmread('input_pnms2022/ReleaseFile_PNMS_Oct2022.txt', '\t');
 
 %% Read in the age and station temperature data:
 
-% Thunnus:
-ageThunn = csvread('postproc/PNMS2022_ThunnusEstAges.csv');
+% Thunnus albacares:
+ageYellowfin = csvread('postproc/PNMS2022_YellowfinEstAges.csv');
+
+% Thunnus obesus:
+ageBigeye = csvread('postproc/PNMS2022_BigeyeEstAges.csv');
 
 % Katsuwonus:
 ageKatsu = csvread('postproc/PNMS2022_KatsuwonusEstAges.csv');
@@ -46,20 +49,21 @@ ageAuxis = csvread('postproc/PNMS2022_AuxisEstAges.csv');
 % temperature dependence according to Z = 0.0256 + 0.0123 * water_T
 
 % calculate the mortality for station temperatures
-ageThunn(:,4) = 0.0256 + 0.0123*ageThunn(:,3); 
+ageYellowfin(:,4) = 0.0256 + 0.0123*ageYellowfin(:,3); 
+ageBigeye(:,4) = 0.0256 + 0.0123*ageBigeye(:,3); 
 ageKatsu(:,4) = 0.0256 + 0.0123*ageKatsu(:,3);
 ageAuxis(:,4) = 0.0256 + 0.0123*ageAuxis(:,3);
 
 %% Build up the data:
 
-% Thunnus:
-nfish = length(ageThunn(:,2));
-lonThunn=[];
-latThunn=[];
+% Thunnus albacares:
+nfish = length(ageYellowfin(:,2));
+lonYellowfin=[];
+latYellowfin=[];
 for ifish = 1:nfish
-    iage = ageThunn(ifish,2);
-    istn = ageThunn(ifish,1);
-    istnZ = ageThunn(ifish, 4);
+    iage = ageYellowfin(ifish,2);
+    istn = ageYellowfin(ifish,1);
+    istnZ = ageYellowfin(ifish, 4);
     % subset the simulation output to get the rows from that station:
     stnmtch = find(relfile(:,1)==istn, 1, 'first');
     isubdata = find(releaseout==stnmtch);
@@ -69,8 +73,30 @@ for ifish = 1:nfish
     % calculate the scaling parameter:
     scalingparam = round(1./exp(-(iage)*istnZ));
     if (~isempty(sublon) && ~isempty(scalingparam))
-        lonThunn = [lonThunn, repmat(sublon, 1, scalingparam)];
-        latThunn = [latThunn, repmat(sublat, 1, scalingparam)];
+        lonYellowfin = [lonYellowfin, repmat(sublon, 1, scalingparam)];
+        latYellowfin = [latYellowfin, repmat(sublat, 1, scalingparam)];
+    end
+end
+
+% Thunnus obesus:
+nfish = length(ageBigeye(:,2));
+lonBigeye=[];
+latBigeye=[];
+for ifish = 1:nfish
+    iage = ageBigeye(ifish,2);
+    istn = ageBigeye(ifish,1);
+    istnZ = ageBigeye(ifish, 4);
+    % subset the simulation output to get the rows from that station:
+    stnmtch = find(relfile(:,1)==istn, 1, 'first');
+    isubdata = find(releaseout==stnmtch);
+    % pull out the column corresponding to the correct age
+    sublon = lonout(iage*2+1, isubdata);
+    sublat = latout(iage*2+1, isubdata);
+    % calculate the scaling parameter:
+    scalingparam = round(1./exp(-(iage)*istnZ));
+    if (~isempty(sublon) && ~isempty(scalingparam))
+        lonBigeye = [lonBigeye, repmat(sublon, 1, scalingparam)];
+        latBigeye = [latBigeye, repmat(sublat, 1, scalingparam)];
     end
 end
 
@@ -118,9 +144,11 @@ for ifish = 1:nfish
     end
 end
 
-% make the 2015 subrelease objects for plotting the release points: 
-I = ismember(relfile(:,1), ageThunn(:,1));
-relThunn = relfile(I,:);
+% make the subrelease objects for plotting the release points: 
+I = ismember(relfile(:,1), ageYellowfin(:,1));
+relYellowfin = relfile(I,:);
+I = ismember(relfile(:,1), ageBigeye(:,1));
+relBigeye = relfile(I,:);
 I = ismember(relfile(:,1), ageKatsu(:,1));
 relKatsu = relfile(I,:);
 I = ismember(relfile(:,1), ageAuxis(:,1));
@@ -133,9 +161,14 @@ currents2022 = csvread('../data/PNMS_Oct2022_currents.csv');
 %% Make the plots:
 
 % taxa in separate plots:
-figure1 = draw_spawn_loc_pnms(lonThunn, latThunn, relThunn, currents2022, 'PNMS2022_ThunnusRelSpawn_20231214.jpg');
-figure2 = draw_spawn_loc_pnms(lonKatsu, latKatsu, relKatsu, currents2022, 'PNMS2022_KatsuRelSpawn_20231214.jpg');
-figure3 = draw_spawn_loc_pnms(lonAuxis, latAuxis, relAuxis, currents2022, 'PNMS2022_AuxisRelSpawn_20231214.jpg');
+figure1 = draw_spawn_loc_pnms(lonYellowfin, latYellowfin, relYellowfin, currents2022, 'PNMS2022_YellowfinRelSpawn_20240220.jpg');
+figure2 = draw_spawn_loc_pnms(lonBigeye, latBigeye, relBigeye, currents2022, 'PNMS2022_BigeyeRelSpawn_20240220.jpg');
+figure3 = draw_spawn_loc_pnms(lonKatsu, latKatsu, relKatsu, currents2022, 'PNMS2022_KatsuRelSpawn_20240220.jpg');
+figure4 = draw_spawn_loc_pnms(lonAuxis, latAuxis, relAuxis, currents2022, 'PNMS2022_AuxisRelSpawn_20240220.jpg');
+
+% Combined Thunnus plot:
+relThunn = unique([relYellowfin; relBigeye], 'rows');
+figure5 = draw_spawn_loc_pnms([lonYellowfin, lonBigeye], [latYellowfin, latBigeye], relThunn, currents2022, 'PNMS2022_ThunnusRelSpawn_20240220.jpg');
 
 
 
