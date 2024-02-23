@@ -45,7 +45,7 @@ names(RADseq_IDs)[1]<- "Sample.ID"
 names(RADseq_IDs)[3]<- "DNA_ID"
 # merge DNA ID's into the photo_data object
 photo_data<- merge(photo_data, RADseq_IDs, by="Sample.ID")
-# View it, summarize manually (see text)
+# View it, summarize manually (see manuscript text)
 View(photo_data)
 
 # Take the genetic IDs as correct:
@@ -253,3 +253,16 @@ tuna_catch_plots(here('results', 'AuxisLarvaeCatch.pdf'),
                  exes = c(tuna_all_plotting$LONGITUDE[I], site_locations$LONGITUDE[-J]),
                  whys = c(tuna_all_plotting$LATITUDE[I], site_locations$LATITUDE[-J]),
                  cexes = c(tuna_all_plotting$Nlarvae[I], rep(NA, length(site_locations$Site[-J]))) )
+
+################################################################################
+## Supplemental Data Table
+################################################################################
+head(length_data)
+
+SuppTable<- merge(length_data, photo_data[,c("Sample.ID", "Piera/Chrissy.ID")])
+SuppTable<- SuppTable[,c("Date", "Site", "Station", "LATITUDE", "LONGITUDE",
+                         "Temperature_depth", "Sample.ID", "Piera/Chrissy.ID",
+                          "Species", "Length.mm", "Age")]
+write.csv(SuppTable, file=here("results", "PNMS_LarvaeDetailsTable.csv"),
+          row.names=FALSE)
+
