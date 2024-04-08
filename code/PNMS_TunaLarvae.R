@@ -8,22 +8,6 @@
 # load packages
 library(openxlsx)
 library(here)
-library(oce)
-library(ocedata)
-library(rgdal)
-library(ncdf4)
-library(viridisLite)
-library(sf)
-library(raster)
-
-# color function:
-append_alpha  <- function(color, alpha) {
-alpha_scaled  <- round(alpha*255)
-alpha_hex  <- as.hexmode(alpha_scaled)
-color_with_alpha  <- paste0(color, alpha_hex)
-
-return(color_with_alpha)
-}
 
 # read in the data tables:
 photo_data<- read.csv(here("data", "PAL22_Tuna photo data.csv"), nrows=22)[,1:6]
@@ -68,6 +52,8 @@ tuna_pooled<- aggregate(Nlarvae~Site+Tow, data=tuna_all, FUN=sum)
 sampleid<- strsplit(as.character(locations$ID), split='_')
 NetID<- sapply(sampleid, '[', 4)
 locations$Tow<- NetID
+# Drop the shallow tows - they are excluded from this study
+locations<- locations[locations$Tow=="D",]
 # In tow_data, get net ID out of column "Sample.ID"
 sampleid<- strsplit(as.character(tow_data$Sample.ID), split='_')
 NetID<- sapply(sampleid, '[', 4)
@@ -137,12 +123,15 @@ length_data<- unique(merge(length_data, tuna_all[,c("Site", "Station", "LATITUDE
 save(file=here("results","PNMS_LengthAge.Rdata"), length_data)
 
 ################################################################################
-## Plot locations of catches with catch numbers
+## Map locations of catches with catch numbers
 ################################################################################
 #The tows within each site are so close together that we need to plot one symbol
 #per site. We also need to get the zero sites. Larvae were caught only in deep
 #tows, so we'll just use those tows to calculate mean station location at each
 #site.
+
+# We're mapping things in QGIS, so this section will write out csv files for
+# each taxon
 
 # separate Site column into Site and Station for locations:
 sampleid<- strsplit(as.character(locations$Site), split='_')
@@ -150,6 +139,8 @@ locations$Site<- sapply(sampleid, '[', 1)
 locations$Station<- sapply(sampleid, '[', 2)
 # aggregate by site:
 site_locations<- aggregate(cbind(LATITUDE,LONGITUDE)~Site, data=locations, FUN=mean)
+# save the site_locations object for mapping in QGIS:
+write.csv(site_locations, file=here('data', 'Site_Locations_Summary.csv'))
 
 # First, for tuna_pooled:
 tuna_pooled_plotting<- aggregate(Nlarvae~Site, data=tuna_pooled, FUN=sum)
@@ -159,100 +150,51 @@ tuna_pooled_plotting<- merge(tuna_pooled_plotting, site_locations, all.y=TRUE)
 tuna_all_plotting<- aggregate(Nlarvae~Site+Species, data=tuna_all, FUN=sum)
 tuna_all_plotting<- merge(tuna_all_plotting, site_locations, all.y=TRUE)
 
-# load the coastline
-data("coastlineWorldFine")
-# read in the bathymetry
-ncid<- nc_open(here('data','Palau_Bathymetry', 'gebco_2023_n15.0_s0.0_w120.0_e145.0.nc'))
-print(ncid)
-bathylat<- ncvar_get(ncid, varid='lat')
-bathylon<- ncvar_get(ncid, varid='lon')
-bathy<- ncvar_get(ncid, varid='elevation')
-nc_close(ncid)
-# read in the PNMS shape file:
-pnms_shp<- st_read(here('data', 'Palau_Shapefiles', 'PNMS.shp'), "PNMS")
-pnms_boundaries<- spTransform(as_Spatial(st_geometry(pnms_shp)), "+proj=cea")
-
-tuna_catch_plots<- function(filename, exes, whys, cexes){
-  # separate out the 0 catch locations:
-  I<- which(is.na(cexes))
-  zerocatch_exes<- exes[I]
-  zerocatch_whys<- whys[I]
-  exes<- exes[-I]
-  whys<- whys[-I]
-  cexes<- cexes[-I]
-
-  # re-order the points in increasing size:
-  I<- order(cexes)
-  exes<- exes[I]
-  whys<- whys[I]
-  cexes<- cexes[I]
-  # initialize colors:
-  colz<- viridisLite::mako(5, alpha=0.75)
-
-  pdf(filename)
-  mapPlot(coastlineWorldFine, longitudelim=c(128, 138), latitudelim=c(1, 12),
-          projection="+proj=cea", grid=FALSE, lwd=2,
-          axisStyle=5, lonlabels=seq(128, 140, 2), latlabels = seq(2, 10, 2))
-  mapContour(bathylon, bathylat, bathy,
-             levels=c(-1000, -3000, -5000), drawlabels = FALSE,
-             lwd=0.75, col=c('darkgrey', 'grey', 'lightgrey'))
-  # Add PNMS boundaries
-  plot(pnms_boundaries, add=TRUE, col=colz[5], border=colz[5])
-
-  # plot larval catch data
-  mapPoints(exes, whys, cex=sqrt(cexes), pch=19, col=colz[3])
-  # plot zero catch locations:
-  mapPoints(zerocatch_exes, zerocatch_whys, cex=1, pch=1, col='red')
-  legend("bottomright", legend=as.character(unique(cexes)), title="N larvae",
-         pch=19, col='grey', pt.cex=sqrt(unique(cexes)))
-
-  # Add an inset map to show the location on the globe:
-  plotInset('bottomleft',
-            expr={plot(coastlineWorldFine, longitudelim=c(115, 160), latitudelim=c(-10, 20),
-                       inset=TRUE, bg='white', axes=F, lwd=0.75)
-              polygon(x=c(127, 127, 140, 140), y=c(1, 12, 12, 1), col='cyan')
-            })
-
-  dev.off()
-}
-
 # Pooled larvae:
-tuna_catch_plots(here('results', 'PooledTunaLarvaeCatch.pdf'),
-                 exes = tuna_pooled_plotting$LONGITUDE,
-                 whys = tuna_pooled_plotting$LATITUDE,
-                 cexes = tuna_pooled_plotting$Nlarvae)
+I<- which(is.na(tuna_pooled_plotting$Nlarvae))
+tuna_pooled_plotting$Nlarvae[I]<- 0
+write.csv(tuna_pooled_plotting, here('results', 'ForQGIS_tuna_pooled.csv'),
+          row.names=FALSE)
 
 # Thunnus albacares
 I<- which(tuna_all_plotting$Species=="Thunnus albacares")
 J<- which(site_locations$Site %in% tuna_all_plotting$Site[I])
-tuna_catch_plots(here('results', 'YellowfinTunaLarvaeCatch.pdf'),
-                 exes = c(tuna_all_plotting$LONGITUDE[I], site_locations$LONGITUDE[-J]),
-                 whys = c(tuna_all_plotting$LATITUDE[I], site_locations$LATITUDE[-J]),
-                 cexes = c(tuna_all_plotting$Nlarvae[I], rep(NA, length(site_locations$Site[-J]))) )
+yellowfin<- tuna_all_plotting[I,c("Site","Nlarvae","LATITUDE",'LONGITUDE')]
+zero_stns<- site_locations[-J,]
+zero_stns$Nlarvae<- 0
+zero_stns<- zero_stns[,c("Site","Nlarvae","LATITUDE",'LONGITUDE')]
+yellowfin<- rbind(yellowfin, zero_stns)
+write.csv(yellowfin, here('results','ForQGIS_yellowfin.csv'))
 
 # Thunnus obesus
 I<- which(tuna_all_plotting$Species=="Thunnus obesus")
 J<- which(site_locations$Site %in% tuna_all_plotting$Site[I])
-tuna_catch_plots(here('results', 'BigeyeTunaLarvaeCatch.pdf'),
-                 exes = c(tuna_all_plotting$LONGITUDE[I], site_locations$LONGITUDE[-J]),
-                 whys = c(tuna_all_plotting$LATITUDE[I], site_locations$LATITUDE[-J]),
-                 cexes = c(tuna_all_plotting$Nlarvae[I], rep(NA, length(site_locations$Site[-J]))) )
+bigeye<- tuna_all_plotting[I,c("Site","Nlarvae","LATITUDE",'LONGITUDE')]
+zero_stns<- site_locations[-J,]
+zero_stns$Nlarvae<- 0
+zero_stns<- zero_stns[,c("Site","Nlarvae","LATITUDE",'LONGITUDE')]
+bigeye<- rbind(bigeye, zero_stns)
+write.csv(bigeye, here('results','ForQGIS_bigeye.csv'))
 
 # Katsuwonus pelamis
 I<- which(tuna_all_plotting$Species=="Katsuwonus pelamis")
 J<- which(site_locations$Site %in% tuna_all_plotting$Site[I])
-tuna_catch_plots(here('results', 'KatsuwonusLarvaeCatch.pdf'),
-                 exes = c(tuna_all_plotting$LONGITUDE[I], site_locations$LONGITUDE[-J]),
-                 whys = c(tuna_all_plotting$LATITUDE[I], site_locations$LATITUDE[-J]),
-                 cexes = c(tuna_all_plotting$Nlarvae[I], rep(NA, length(site_locations$Site[-J]))) )
+skipjack<- tuna_all_plotting[I,c("Site","Nlarvae","LATITUDE",'LONGITUDE')]
+zero_stns<- site_locations[-J,]
+zero_stns$Nlarvae<- 0
+zero_stns<- zero_stns[,c("Site","Nlarvae","LATITUDE",'LONGITUDE')]
+skipjack<- rbind(skipjack, zero_stns)
+write.csv(skipjack, here('results','ForQGIS_skipjack.csv'))
 
 # Auxis
 I<- which(tuna_all_plotting$Species=="Auxis thazard")
 J<- which(site_locations$Site %in% tuna_all_plotting$Site[I])
-tuna_catch_plots(here('results', 'AuxisLarvaeCatch.pdf'),
-                 exes = c(tuna_all_plotting$LONGITUDE[I], site_locations$LONGITUDE[-J]),
-                 whys = c(tuna_all_plotting$LATITUDE[I], site_locations$LATITUDE[-J]),
-                 cexes = c(tuna_all_plotting$Nlarvae[I], rep(NA, length(site_locations$Site[-J]))) )
+auxis<- tuna_all_plotting[I,c("Site","Nlarvae","LATITUDE",'LONGITUDE')]
+zero_stns<- site_locations[-J,]
+zero_stns$Nlarvae<- 0
+zero_stns<- zero_stns[,c("Site","Nlarvae","LATITUDE",'LONGITUDE')]
+auxis<- rbind(auxis, zero_stns)
+write.csv(auxis, here('results','ForQGIS_auxis.csv'))
 
 ################################################################################
 ## Supplemental Data Table
