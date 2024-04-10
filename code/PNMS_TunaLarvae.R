@@ -87,7 +87,8 @@ tuna_pooled$Station<- sapply(sampleid, '[', 2)
 ################################################################################
 
 # Merge the photo and length data together:
-length_data<- merge(length_data, photo_data, by.x="Image", by.y="Image_for_length")
+length_data<- merge(length_data, photo_data, by.x="Image", by.y="Image_for_length",
+                    all.y=TRUE)
 length_data<- length_data[,c("Sample.ID", "Site", "Species", "Image",
                              "Magnification", "Length")]
 
@@ -119,7 +120,12 @@ length_data$Station<- sapply(sampleid, '[', 2)
 # merge with tuna_all to add lat/lon and date information:
 length_data<- unique(merge(length_data, tuna_all[,c("Site", "Station", "LATITUDE", "LONGITUDE", "Date", "Temperature_depth")],
                      by=c("Site", "Station")))
-# save as .Rdata:
+# keep the object that has all the larvae, including the ones that couldn't be measured:
+length_data_all<- length_data
+# drop the larvae that couldn't be measured:
+I<- which(!is.na(length_data$Length))
+length_data<- length_data[I,]
+# save as .Rdata
 save(file=here("results","PNMS_LengthAge.Rdata"), length_data)
 
 ################################################################################
@@ -201,10 +207,11 @@ write.csv(auxis, here('results','ForQGIS_auxis.csv'))
 ################################################################################
 head(length_data)
 
-SuppTable<- merge(length_data, photo_data[,c("Sample.ID", "Piera/Chrissy.ID")])
+SuppTable<- merge(length_data_all, photo_data[,c("Sample.ID", "Piera/Chrissy.ID")])
 SuppTable<- SuppTable[,c("Date", "Site", "Station", "LATITUDE", "LONGITUDE",
                          "Temperature_depth", "Sample.ID", "Piera/Chrissy.ID",
                           "Species", "Length.mm", "Age")]
 write.csv(SuppTable, file=here("results", "PNMS_LarvaeDetailsTable.csv"),
           row.names=FALSE)
+
 
