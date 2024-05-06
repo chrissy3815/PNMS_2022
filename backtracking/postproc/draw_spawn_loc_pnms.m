@@ -53,38 +53,53 @@ bathylat = bathylat(J);
 bathylon = bathylon(I);
 bathy = bathy(I,J);
 % plot the bathymetry:
-contour(bathylon, bathylat, bathy', [-5000 -3000 -1000 0], 'Color', [.2 .2 .2])
+contour(bathylon, bathylat, bathy', [0 0], 'Color', [.2 .2 .2])
 hold on
 
-% % bin the currents into 1/2 degree bins:
-% I = find(currents(:,1)-floor(currents(:,1))<0.5);
-% currents(I,1) = floor(currents(I,1));
-% J = find(currents(:,2) - floor(currents(:,2))<0.5);
-% currents(J,2)= floor(currents(J,2));
-% K = find(currents(:,1)-floor(currents(:,1))>0.5);
-% currents(K,1)= floor(currents(K,1)) + 0.5;
-% L= find(currents(:,2)-floor(currents(:,2))>0.5);
-% currents(L,2)= floor(currents(L,2)) + 0.5;
-% 
-% lonbins = unique(currents(:,1));
-% latbins = unique(currents(:,2));
-% currents2=[];
-% 
-% for i = 1:length(lonbins)
-%     I = find(currents(:,1)==lonbins(i));
-%    for j = 1:length(latbins)
-%        J = find(currents(:,2)==latbins(j));
-%        
-%        K = find(ismember(J,I));
-%        
-%        meancurr_u = nanmean(currents(J(K),3));
-%        meancurr_v = nanmean(currents(J(K),4));
-%        
-%        temprow = [lonbins(i), latbins(j), meancurr_u, meancurr_v];
-%        currents2 = [currents2; temprow];
-%        
-%    end
-% end
+% bin the currents into 1/4 degree bins:
+% longitude:
+I = find(currents(:,1)-floor(currents(:,1))<0.25);
+J = find(currents(:,1)-floor(currents(:,1))>=0.25 & currents(:,1)-floor(currents(:,1))<0.5);
+K = find(currents(:,1)-floor(currents(:,1))>=0.5 & currents(:,1)-floor(currents(:,1))<0.75);
+L = find(currents(:,1)-floor(currents(:,1))>=0.75 & currents(:,1)-floor(currents(:,1))<1);
+
+currents(I,1) = floor(currents(I,1));
+currents(J,1) = floor(currents(J,1))+0.25;
+currents(K,1) = floor(currents(K,1))+0.5;
+currents(L,1) = floor(currents(L,1))+0.75;
+
+% latitude:
+I = find(currents(:,2)-floor(currents(:,2))<0.25);
+J = find(currents(:,2)-floor(currents(:,2))>=0.25 & currents(:,2)-floor(currents(:,2))<0.5);
+K = find(currents(:,2)-floor(currents(:,2))>=0.5 & currents(:,2)-floor(currents(:,2))<0.75);
+L = find(currents(:,2)-floor(currents(:,2))>=0.75 & currents(:,2)-floor(currents(:,2))<1);
+
+currents(I,2) = floor(currents(I,2));
+currents(J,2) = floor(currents(J,2))+0.25;
+currents(K,2) = floor(currents(K,2))+0.5;
+currents(L,2) = floor(currents(L,2))+0.75;
+
+lonbins = unique(currents(:,1));
+latbins = unique(currents(:,2));
+currents2=[];
+
+for i = 1:length(lonbins)
+    I = find(currents(:,1)==lonbins(i));
+   for j = 1:length(latbins)
+       J = find(currents(:,2)==latbins(j));
+       
+       K = find(ismember(J,I));
+       
+       meancurr_u = nanmean(currents(J(K),3));
+       meancurr_v = nanmean(currents(J(K),4));
+       
+       temprow = [lonbins(i), latbins(j), meancurr_u, meancurr_v];
+       currents2 = [currents2; temprow];
+       
+   end
+end
+
+currents = currents2;
 
 % subset the currents to just the area we want to plot:
 I = find(currents(:,1)>=131 & currents(:,1)<=136); % filter longitude
@@ -92,9 +107,13 @@ currents = currents(I,:);
 I = find(currents(:,2)>=5 & currents(:,2)<=10); % filter latitude
 currents = currents(I,:);
 
+% Append a dummy entry to the end of currents to be the scale bar:
+newrow = [134.6, 5.75, 50, 0];
+currents = [currents; newrow];
+
 % plot the currents:
 %q = quiver(currents2(:,1), currents2(:,2), currents2(:,3), currents2(:,4));
-q = quiver(currents(:,1), currents(:,2), currents(:,3), currents(:,4));
+q = quiver(currents(:,1), currents(:,2), currents(:,3), currents(:,4), 2);
 q.Color = [0.7 0.7 0.7];
 hold on
 
@@ -109,7 +128,7 @@ wg = jet;
 colormap(wg);
 c = colorbar('FontSize', 18);
 caxis([minval maxval]);
-c.Label.String = 'Relative Spawning Output (log-scale)';
+c.Label.String = 'log10[Relative Spawning Output]';
 hold on
 
 % add the release points

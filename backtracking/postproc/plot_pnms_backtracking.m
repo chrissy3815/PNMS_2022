@@ -1,4 +1,4 @@
-%% This is the run script for making figures for the manuscript 
+% This is the run script for making figures for the manuscript 
 % Dec 13 2023
 % It will read the trajectory files, read in the age data for aged fish, 
 % and use the CTD data to scale the number of particles at the
@@ -71,7 +71,7 @@ for ifish = 1:nfish
     sublon = lonout(iage*2+1, isubdata);
     sublat = latout(iage*2+1, isubdata);
     % calculate the scaling parameter:
-    scalingparam = round(1./exp(-(iage)*istnZ));
+    scalingparam = round(exp(iage*istnZ));
     if (~isempty(sublon) && ~isempty(scalingparam))
         lonYellowfin = [lonYellowfin, repmat(sublon, 1, scalingparam)];
         latYellowfin = [latYellowfin, repmat(sublat, 1, scalingparam)];
@@ -93,7 +93,7 @@ for ifish = 1:nfish
     sublon = lonout(iage*2+1, isubdata);
     sublat = latout(iage*2+1, isubdata);
     % calculate the scaling parameter:
-    scalingparam = round(1./exp(-(iage)*istnZ));
+    scalingparam = round(exp(iage*istnZ));
     if (~isempty(sublon) && ~isempty(scalingparam))
         lonBigeye = [lonBigeye, repmat(sublon, 1, scalingparam)];
         latBigeye = [latBigeye, repmat(sublat, 1, scalingparam)];
@@ -115,7 +115,7 @@ for ifish = 1:nfish
     sublon = lonout(iage*2+1, isubdata);
     sublat = latout(iage*2+1, isubdata);
     % calculate the scaling parameter:
-    scalingparam = round(1./exp(-(iage)*istnZ));
+    scalingparam = round(exp(iage*istnZ));
     if (~isempty(sublon) && ~isempty(scalingparam))
         lonKatsu = [lonKatsu, repmat(sublon, 1, scalingparam)];
         latKatsu = [latKatsu, repmat(sublat, 1, scalingparam)];
@@ -137,7 +137,7 @@ for ifish = 1:nfish
     sublon = lonout(iage*2+1, isubdata);
     sublat = latout(iage*2+1, isubdata);
     % calculate the scaling parameter:
-    scalingparam = round(1./exp(-(iage)*istnZ));
+    scalingparam = round(exp(iage*istnZ));
     if (~isempty(sublon) && ~isempty(scalingparam))
         lonAuxis = [lonAuxis, repmat(sublon, 1, scalingparam)];
         latAuxis = [latAuxis, repmat(sublat, 1, scalingparam)];
@@ -158,17 +158,36 @@ relAuxis = relfile(I,:);
 
 currents2022 = csvread('../data/PNMS_Oct2022_currents.csv');
 
+% Calculate average currents
+
+I = find(currents2022(:,1)>=133.5 & currents2022(:,1)<=134.5); % filter longitude
+filtered_currents = currents2022(I,:);
+I = find(filtered_currents(:,2)>=5.5 & filtered_currents(:,2)<=7); % filter latitude
+filtered_currents = filtered_currents(I,:);
+
+% calculate the magnitude at each point:
+magz = sqrt(filtered_currents(:,3).^2 + filtered_currents(:,4).^2);
+mean(magz)
+
 %% Make the plots:
 
 % taxa in separate plots:
-figure1 = draw_spawn_loc_pnms(lonYellowfin, latYellowfin, relYellowfin, currents2022, 'PNMS2022_YellowfinRelSpawn_20240220.jpg');
-figure2 = draw_spawn_loc_pnms(lonBigeye, latBigeye, relBigeye, currents2022, 'PNMS2022_BigeyeRelSpawn_20240220.jpg');
-figure3 = draw_spawn_loc_pnms(lonKatsu, latKatsu, relKatsu, currents2022, 'PNMS2022_KatsuRelSpawn_20240220.jpg');
-figure4 = draw_spawn_loc_pnms(lonAuxis, latAuxis, relAuxis, currents2022, 'PNMS2022_AuxisRelSpawn_20240220.jpg');
+figure1 = draw_spawn_loc_pnms(lonYellowfin, latYellowfin, relYellowfin, currents2022, 'PNMS2022_YellowfinRelSpawn_20240506.jpg');
+set(gcf, 'Renderer', 'painters')
+print('PNMS2022_YellowfinRelSpawn_20240506.eps', '-depsc2')
+figure2 = draw_spawn_loc_pnms(lonBigeye, latBigeye, relBigeye, currents2022, 'PNMS2022_BigeyeRelSpawn_20240506.jpg');
+set(gcf, 'Renderer', 'painters')
+print('PNMS2022_BigeyeRelSpawn_20240506.eps', '-depsc2')
+figure3 = draw_spawn_loc_pnms(lonKatsu, latKatsu, relKatsu, currents2022, 'PNMS2022_KatsuRelSpawn_20240506.jpg');
+set(gcf, 'Renderer', 'painters')
+print('PNMS2022_KatsuRelSpawn_20240506.eps', '-depsc2')
+figure4 = draw_spawn_loc_pnms(lonAuxis, latAuxis, relAuxis, currents2022, 'PNMS2022_AuxisRelSpawn_20240506.jpg');
+set(gcf, 'Renderer', 'painters')
+print('PNMS2022_AuxisRelSpawn_20240506.eps', '-depsc2')
 
 % Combined Thunnus plot:
 relThunn = unique([relYellowfin; relBigeye], 'rows');
-figure5 = draw_spawn_loc_pnms([lonYellowfin, lonBigeye], [latYellowfin, latBigeye], relThunn, currents2022, 'PNMS2022_ThunnusRelSpawn_20240220.jpg');
-
-
+figure5 = draw_spawn_loc_pnms([lonYellowfin, lonBigeye], [latYellowfin, latBigeye], relThunn, currents2022, 'PNMS2022_ThunnusRelSpawn_20240506.jpg');
+set(gcf, 'Renderer', 'painters')
+print('PNMS2022_ThunnusRelSpawn_20240506.eps', '-depsc2')
 
